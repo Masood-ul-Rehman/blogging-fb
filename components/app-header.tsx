@@ -65,14 +65,14 @@ function NavigationLinks() {
   return (
     <>
       <Link
-        href="/content"
+        href="/app/content"
         className="text-sm px-3 py-1.5 rounded-md hover:bg-accent"
       >
         Content
       </Link>
       {isSignedIn && (
         <Link
-          href="/dashboard"
+          href="/app/dashboard"
           className="text-sm px-3 py-1.5 rounded-md hover:bg-accent"
         >
           Dashboard
@@ -80,7 +80,7 @@ function NavigationLinks() {
       )}
       {isSignedIn && (
         <Link
-          href="/ads"
+          href="/app/ads"
           className="text-sm px-3 py-1.5 rounded-md hover:bg-accent"
         >
           Ads
@@ -88,7 +88,7 @@ function NavigationLinks() {
       )}
       {isSignedIn && canManageContent(role) && (
         <Button asChild variant="outline" size="sm">
-          <Link href="/content/new">New</Link>
+          <Link href="/app/content/new">New</Link>
         </Button>
       )}
     </>

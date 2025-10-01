@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
 
 export default function AdsPage() {
-  redirect("/ads/list");
+  redirect("/app/ads/list");
 }

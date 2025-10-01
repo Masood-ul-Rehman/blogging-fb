@@ -44,10 +44,10 @@ export function AuthAwareCTAButtons({
     return (
       <div className="flex items-center gap-3">
         <Button asChild size={size}>
-          <Link href="/dashboard">Go to Dashboard</Link>
+          <Link href="/app/dashboard">Go to Dashboard</Link>
         </Button>
         <Button asChild size={size} variant="outline">
-          <Link href="/content">Manage Content</Link>
+          <Link href="/app/content">Manage Content</Link>
         </Button>
       </div>
     );

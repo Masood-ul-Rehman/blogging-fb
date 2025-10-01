@@ -361,7 +361,7 @@ export default function CreateAdPage() {
       });
 
       toast.success("Ad created successfully!");
-      router.push(`/ads/performance?account=${selectedAccount}`);
+      router.push(`/app/ads/performance?account=${selectedAccount}`);
     } catch (error: any) {
       console.error("Failed to create ad:", error);
       setError(error.message || "Failed to create ad. Please try again.");
@@ -374,9 +374,9 @@ export default function CreateAdPage() {
   // Check if user has Facebook connection
   if (hasConnection === false) {
     return (
-      <div className="container mx-auto py-8 px-4">
+      <main className="container mx-auto py-8 px-4 flex-1">
         <div className="mb-8">
-          <Link href="/ads/list">
+          <Link href="/app/ads/list">
             <Button variant="ghost" size="sm">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Ads
@@ -392,15 +392,15 @@ export default function CreateAdPage() {
 
           <TokenStatus />
         </div>
-      </div>
+      </main>
     );
   }
 
   if (adAccounts.length === 0) {
     return (
-      <div className="container mx-auto py-8 px-4">
+      <main className="container mx-auto py-8 px-4 flex-1">
         <div className="mb-8">
-          <Link href="/ads/list">
+          <Link href="/app/ads/list">
             <Button variant="ghost" size="sm">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Ads
@@ -420,14 +420,14 @@ export default function CreateAdPage() {
             </AlertDescription>
           </Alert>
         </div>
-      </div>
+      </main>
     );
   }
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    <main className="container mx-auto py-8 px-4 flex-1">
       <div className="mb-8">
-        <Link href="/ads/list">
+        <Link href="/app/ads/list">
           <Button variant="ghost" size="sm">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Ads
@@ -518,6 +518,6 @@ export default function CreateAdPage() {
           />
         )}
       </AdCreationWizard>
-    </div>
+    </main>
   );
 }

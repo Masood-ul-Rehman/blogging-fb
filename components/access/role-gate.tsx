@@ -51,7 +51,7 @@ export function RoleGate({
               <Link href="/">Return Home</Link>
             </Button>
             <Button asChild variant="outline">
-              <Link href="/dashboard">Dashboard</Link>
+              <Link href="/app/dashboard">Dashboard</Link>
             </Button>
           </div>
         </div>

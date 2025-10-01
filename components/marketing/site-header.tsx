@@ -52,10 +52,10 @@ export function SiteHeader() {
             // Authenticated state
             <div className="flex items-center gap-3">
               <Button asChild variant="ghost" size="sm">
-                <Link href="/dashboard">Dashboard</Link>
+                <Link href="/app/dashboard">Dashboard</Link>
               </Button>
               <Button asChild size="sm">
-                <Link href="/content">Content</Link>
+                <Link href="/app/content">Content</Link>
               </Button>
               <UserButton afterSignOutUrl="/" />
             </div>

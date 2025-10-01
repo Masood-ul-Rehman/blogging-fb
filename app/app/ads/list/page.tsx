@@ -33,13 +33,13 @@ export default function AdsListPage() {
     if (connected === "true") {
       toast.success("Facebook account connected successfully!");
       // Clean up URL
-      window.history.replaceState({}, "", "/ads/list");
+      window.history.replaceState({}, "", "/app/ads/list");
     }
 
     if (error) {
       toast.error(decodeURIComponent(error));
       // Clean up URL
-      window.history.replaceState({}, "", "/ads/list");
+      window.history.replaceState({}, "", "/app/ads/list");
     }
   }, [searchParams]);
 
@@ -56,7 +56,7 @@ export default function AdsListPage() {
   };
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    <main className="container mx-auto py-8 px-4 flex-1">
       <div className="mb-8 flex items-center justify-between">
         <div>
           <h1 className="text-4xl font-bold mb-2">Facebook Ads Management</h1>
@@ -65,7 +65,7 @@ export default function AdsListPage() {
           </p>
         </div>
         {connection?.isActive && adAccounts.length > 0 && (
-          <Link href="/ads/create">
+          <Link href="/app/ads/create">
             <Button size="lg">
               <Plus className="mr-2 h-5 w-5" />
               Create Ad
@@ -150,7 +150,7 @@ export default function AdsListPage() {
                       <CardContent>
                         <div className="flex gap-2">
                           <Link
-                            href={`/ads/performance?account=${encodeURIComponent(
+                            href={`/app/ads/performance?account=${encodeURIComponent(
                               account.id
                             )}`}
                             className="flex-1"
@@ -160,7 +160,7 @@ export default function AdsListPage() {
                               Performance
                             </Button>
                           </Link>
-                          <Link href="/ads/create" className="flex-1">
+                          <Link href="/app/ads/create" className="flex-1">
                             <Button className="w-full">
                               <Plus className="mr-2 h-4 w-4" />
                               Create Ad
@@ -185,6 +185,6 @@ export default function AdsListPage() {
           </Card>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

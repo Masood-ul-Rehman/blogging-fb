@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect } from "react";
-import { AppHeader } from "@/components/app-header";
 import { AuthGuard } from "@/components/access/auth-guard";
 import {
   Card,
@@ -226,37 +225,34 @@ export default function DashboardPage() {
     document.title = "Dashboard | Blog Proto";
   }, []);
   return (
-    <AuthGuard>
-      <div className="min-h-dvh flex flex-col">
-        <AppHeader />
-        <main className="mx-auto max-w-6xl px-4 py-8 space-y-8 flex-1">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-semibold">Content Dashboard</h1>
-              <p className="text-muted-foreground">
-                Overview of content metrics and recent activity.
-              </p>
-            </div>
-            <Button asChild>
-              <Link href="/content/new">Add Content</Link>
-            </Button>
+    <AuthGuard showNavigation={false}>
+      <main className="mx-auto max-w-6xl px-4 py-8 space-y-8 flex-1">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-semibold">Content Dashboard</h1>
+            <p className="text-muted-foreground">
+              Overview of content metrics and recent activity.
+            </p>
           </div>
+          <Button asChild>
+            <Link href="/app/content/new">Add Content</Link>
+          </Button>
+        </div>
 
-          <ContentMetrics />
+        <ContentMetrics />
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Content</CardTitle>
-              <CardDescription>
-                Latest content added to your collection.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ContentList limit={5} />
-            </CardContent>
-          </Card>
-        </main>
-      </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>Recent Content</CardTitle>
+            <CardDescription>
+              Latest content added to your collection.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ContentList limit={5} />
+          </CardContent>
+        </Card>
+      </main>
     </AuthGuard>
   );
 }

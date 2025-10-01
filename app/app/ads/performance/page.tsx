@@ -110,7 +110,7 @@ export default function AdsPerformancePage() {
 
   if (adAccounts.length === 0) {
     return (
-      <div className="container mx-auto py-8 px-4">
+      <main className="container mx-auto py-8 px-4 flex-1">
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2">Ad Performance</h1>
           <p className="text-muted-foreground">
@@ -123,7 +123,7 @@ export default function AdsPerformancePage() {
             <TokenStatus />
           </div>
         </div>
-      </div>
+      </main>
     );
   }
 
@@ -132,7 +132,7 @@ export default function AdsPerformancePage() {
   );
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    <main className="container mx-auto py-8 px-4 flex-1">
       <div className="mb-8">
         <h1 className="text-4xl font-bold mb-2">Ad Performance</h1>
         <p className="text-muted-foreground">
@@ -296,6 +296,6 @@ export default function AdsPerformancePage() {
           />
         </CardContent>
       </Card>
-    </div>
+    </main>
   );
 }

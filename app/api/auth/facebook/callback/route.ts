@@ -178,7 +178,7 @@ export async function GET(request: NextRequest) {
       });
       return NextResponse.redirect(
         new URL(
-          `/ads/list?error=${encodeURIComponent(
+          `/app/ads/list?error=${encodeURIComponent(
             errorDescription || "Facebook authorization failed"
           )}`,
           request.url
@@ -290,13 +290,13 @@ export async function GET(request: NextRequest) {
 
     // Redirect to success page
     return NextResponse.redirect(
-      new URL("/ads/list?connected=true", request.url)
+      new URL("/app/ads/list?connected=true", request.url)
     );
   } catch (error: any) {
     console.error("Facebook OAuth callback error:", error);
     return NextResponse.redirect(
       new URL(
-        `/ads/list?error=${encodeURIComponent(
+        `/app/ads/list?error=${encodeURIComponent(
           error.message || "Failed to connect Facebook"
         )}`,
         request.url
