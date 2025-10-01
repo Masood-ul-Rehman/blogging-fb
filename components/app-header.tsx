@@ -78,6 +78,14 @@ function NavigationLinks() {
           Dashboard
         </Link>
       )}
+      {isSignedIn && (
+        <Link
+          href="/ads"
+          className="text-sm px-3 py-1.5 rounded-md hover:bg-accent"
+        >
+          Ads
+        </Link>
+      )}
       {isSignedIn && canManageContent(role) && (
         <Button asChild variant="outline" size="sm">
           <Link href="/content/new">New</Link>
