@@ -3,6 +3,7 @@ import { getCurrentUserNullable } from "../auth/helpers";
 
 /**
  * Internal query to get full connection with access token (server-side only)
+ * Checks for token expiration and returns null if expired
  */
 export const _getFacebookConnectionWithToken = internalQuery({
   args: {},
@@ -13,12 +14,29 @@ export const _getFacebookConnectionWithToken = internalQuery({
       return null;
     }
 
-    return await ctx.db
+    const connection = await ctx.db
       .query("facebook_connections")
       .withIndex("by_clerkUserId", (q) =>
         q.eq("clerkUserId", currentUser.userId)
       )
       .first();
+
+    if (!connection) {
+      return null;
+    }
+
+    // Check if token is expired
+    const now = Date.now();
+    if (connection.expiresAt <= now) {
+      console.log(
+        `Token expired for user ${currentUser.userId}. Expires at: ${new Date(
+          connection.expiresAt
+        ).toISOString()}, Now: ${new Date(now).toISOString()}`
+      );
+      return null; // Token expired, return null to trigger "No active connection" error
+    }
+
+    return connection;
   },
 });
 

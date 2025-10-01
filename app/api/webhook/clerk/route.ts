@@ -10,7 +10,7 @@ type WebhookEvent = {
   type: string;
   data: {
     id: string;
-    email_addresses: Array<{
+    email_addresses?: Array<{
       email_address: string;
       id: string;
     }>;
@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
   // Handle the webhook
   const { type, data } = evt;
   const userId = data.id;
-  const email = data.email_addresses[0]?.email_address || "";
+  const email = data.email_addresses?.[0]?.email_address || "";
   const name =
     data.first_name && data.last_name
       ? `${data.first_name} ${data.last_name}`.trim()

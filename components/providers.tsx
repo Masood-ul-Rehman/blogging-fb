@@ -6,7 +6,7 @@ import { ConvexProviderWithClerk } from "convex/react-clerk";
 import { ConvexProvider } from "convex/react";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
-import { type PropsWithChildren, useMemo } from "react";
+import { type PropsWithChildren, useMemo, useEffect } from "react";
 
 export function Providers({ children }: PropsWithChildren) {
   // Use useMemo to ensure consistent values during hydration
@@ -44,6 +44,31 @@ export function Providers({ children }: PropsWithChildren) {
     }
     return null;
   }, [convexEnabled, convexUrl]);
+
+  // Suppress Clerk clock skew warnings in development
+  useEffect(() => {
+    if (process.env.NODE_ENV === "development") {
+      const originalWarn = console.warn;
+      console.warn = (...args: any[]) => {
+        // Filter out Clerk clock skew warnings
+        const message = args[0]?.toString() || "";
+        if (
+          message.includes("Clerk: Clock skew detected") ||
+          message.includes("reason=token-iat-in-the-future") ||
+          message.includes(
+            "Clerk: Refreshing the session token resulted in an infinite redirect loop"
+          )
+        ) {
+          return; // Suppress these warnings
+        }
+        originalWarn.apply(console, args);
+      };
+
+      return () => {
+        console.warn = originalWarn; // Cleanup on unmount
+      };
+    }
+  }, []);
 
   const content = (
     <ThemeProvider

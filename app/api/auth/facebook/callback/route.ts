@@ -5,7 +5,6 @@ import { api } from "@/convex/_generated/api";
 
 const FACEBOOK_APP_ID = process.env.FACEBOOK_APP_ID!;
 const FACEBOOK_APP_SECRET = process.env.FACEBOOK_APP_SECRET!;
-const FACEBOOK_OAUTH_REDIRECT_URI = process.env.FACEBOOK_OAUTH_REDIRECT_URI!;
 const CONVEX_URL = process.env.NEXT_PUBLIC_CONVEX_URL!;
 
 interface FacebookTokenResponse {
@@ -31,20 +30,27 @@ interface FacebookAdAccount {
   account_id: string;
   name: string;
   currency: string;
-  timezone: string;
+  timezone?: string;
 }
 
 /**
  * Exchange authorization code for short-lived access token
  */
 async function exchangeCodeForToken(
-  code: string
+  code: string,
+  redirectUri: string
 ): Promise<FacebookTokenResponse> {
   const params = new URLSearchParams({
     client_id: FACEBOOK_APP_ID,
     client_secret: FACEBOOK_APP_SECRET,
-    redirect_uri: FACEBOOK_OAUTH_REDIRECT_URI,
+    redirect_uri: redirectUri,
     code,
+  });
+
+  console.log("Token exchange params:", {
+    client_id: FACEBOOK_APP_ID,
+    redirect_uri: redirectUri,
+    code_present: !!code,
   });
 
   const response = await fetch(
@@ -54,6 +60,7 @@ async function exchangeCodeForToken(
 
   if (!response.ok) {
     const error = await response.json();
+    console.error("Token exchange error details:", error);
     throw new Error(
       `Token exchange failed: ${error.error?.message || response.statusText}`
     );
@@ -211,9 +218,20 @@ export async function GET(request: NextRequest) {
     // Use the user ID from state instead of auth
     const finalUserId = userIdFromState;
 
+    // Construct the redirect URI - must match exactly what was sent in the initial request
+    // Use environment variable if set, otherwise construct from request
+    const redirectUri =
+      process.env.FACEBOOK_OAUTH_REDIRECT_URI ||
+      process.env.NEXT_PUBLIC_FACEBOOK_REDIRECT_URI ||
+      `${request.nextUrl.protocol}//${request.nextUrl.host}/api/auth/facebook/callback`;
+
+    console.log("Using redirect URI:", redirectUri);
+    console.log("Request protocol:", request.nextUrl.protocol);
+    console.log("Request host:", request.nextUrl.host);
+
     // Step 1: Exchange code for short-lived token
     console.log("Exchanging code for token...");
-    const tokenResponse = await exchangeCodeForToken(code);
+    const tokenResponse = await exchangeCodeForToken(code, redirectUri);
 
     // Step 2: Exchange short-lived token for long-lived token
     console.log("Exchanging for long-lived token...");
@@ -234,27 +252,30 @@ export async function GET(request: NextRequest) {
     // Step 5: Calculate token expiration
     const expiresAt = Date.now() + longLivedTokenResponse.expires_in * 1000;
 
-    // Step 6: Save to Convex using authenticated client
+    // Step 6: Save to Convex (without authentication - using OAuth-specific mutation)
     console.log("Saving to Convex...");
     const convexClient = new ConvexHttpClient(CONVEX_URL);
-    convexClient.setAuth(finalUserId); // Set Clerk auth
 
     // Note: In production, encrypt the access token before storing
     // For example, using crypto.createCipheriv with FB_TOKEN_ENCRYPTION_KEY
-    await convexClient.mutation(api.facebook.mutations.saveFacebookConnection, {
-      fbUserId: fbUser.id,
-      accessToken: longLivedTokenResponse.access_token, // Should be encrypted
-      tokenType: longLivedTokenResponse.token_type,
-      expiresAt,
-      scopes: ["ads_read", "ads_management"], // Update based on actual granted scopes
-      adAccounts: adAccounts.map((acc) => ({
-        id: acc.id,
-        accountId: acc.account_id,
-        name: acc.name,
-        currency: acc.currency,
-        timezone: acc.timezone,
-      })),
-    });
+    await convexClient.mutation(
+      api.facebook.mutations.saveFacebookConnectionOAuth,
+      {
+        clerkUserId: finalUserId,
+        fbUserId: fbUser.id,
+        accessToken: longLivedTokenResponse.access_token, // Should be encrypted
+        tokenType: longLivedTokenResponse.token_type,
+        expiresAt,
+        scopes: ["ads_read", "ads_management"], // Update based on actual granted scopes
+        adAccounts: adAccounts.map((acc) => ({
+          id: acc.id,
+          accountId: acc.account_id,
+          name: acc.name,
+          currency: acc.currency,
+          timezone: acc.timezone || undefined, // Optional field
+        })),
+      }
+    );
 
     console.log("Facebook connection saved successfully");
 

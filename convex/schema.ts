@@ -71,7 +71,7 @@ export default defineSchema({
         accountId: v.string(),
         name: v.string(),
         currency: v.string(),
-        timezone: v.string(),
+        timezone: v.optional(v.string()),
       })
     ),
     connectedAt: v.number(), // When first connected

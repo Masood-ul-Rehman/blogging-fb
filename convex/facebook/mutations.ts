@@ -1,9 +1,82 @@
 import { v } from "convex/values";
 import { mutation } from "../_generated/server";
 import { getCurrentUser } from "../auth/helpers";
+import { ConvexError } from "convex/values";
 
 /**
- * Save or update Facebook connection for a user
+ * Save or update Facebook connection for a user (server-side OAuth callback)
+ * This version accepts userId as a parameter for use in OAuth callbacks
+ */
+export const saveFacebookConnectionOAuth = mutation({
+  args: {
+    clerkUserId: v.string(),
+    fbUserId: v.string(),
+    accessToken: v.string(),
+    tokenType: v.string(),
+    expiresAt: v.number(),
+    scopes: v.array(v.string()),
+    adAccounts: v.array(
+      v.object({
+        id: v.string(),
+        accountId: v.string(),
+        name: v.string(),
+        currency: v.string(),
+        timezone: v.optional(v.string()),
+      })
+    ),
+  },
+  handler: async (ctx, args) => {
+    // Verify user exists
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_userId", (q) => q.eq("userId", args.clerkUserId))
+      .first();
+
+    if (!user) {
+      throw new ConvexError(`User not found: ${args.clerkUserId}`);
+    }
+
+    // Check if connection already exists
+    const existing = await ctx.db
+      .query("facebook_connections")
+      .withIndex("by_clerkUserId", (q) => q.eq("clerkUserId", args.clerkUserId))
+      .first();
+
+    const now = Date.now();
+
+    if (existing) {
+      // Update existing connection
+      await ctx.db.patch(existing._id, {
+        fbUserId: args.fbUserId,
+        accessToken: args.accessToken,
+        tokenType: args.tokenType,
+        expiresAt: args.expiresAt,
+        scopes: args.scopes,
+        adAccounts: args.adAccounts,
+        lastSyncedAt: now,
+        isActive: true,
+      });
+      return existing._id;
+    } else {
+      // Create new connection
+      return await ctx.db.insert("facebook_connections", {
+        clerkUserId: args.clerkUserId,
+        fbUserId: args.fbUserId,
+        accessToken: args.accessToken,
+        tokenType: args.tokenType,
+        expiresAt: args.expiresAt,
+        scopes: args.scopes,
+        adAccounts: args.adAccounts,
+        connectedAt: now,
+        lastSyncedAt: now,
+        isActive: true,
+      });
+    }
+  },
+});
+
+/**
+ * Save or update Facebook connection for a user (client-side)
  * Called after successful OAuth flow
  */
 export const saveFacebookConnection = mutation({
@@ -19,7 +92,7 @@ export const saveFacebookConnection = mutation({
         accountId: v.string(),
         name: v.string(),
         currency: v.string(),
-        timezone: v.string(),
+        timezone: v.optional(v.string()),
       })
     ),
   },
@@ -105,7 +178,7 @@ export const updateAdAccounts = mutation({
         accountId: v.string(),
         name: v.string(),
         currency: v.string(),
-        timezone: v.string(),
+        timezone: v.optional(v.string()),
       })
     ),
   },
