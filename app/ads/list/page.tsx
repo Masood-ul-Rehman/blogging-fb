@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ExternalLink, RefreshCw, TrendingUp } from "lucide-react";
+import { ExternalLink, RefreshCw, TrendingUp, Plus } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
@@ -57,11 +57,21 @@ export default function AdsListPage() {
 
   return (
     <div className="container mx-auto py-8 px-4">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-2">Facebook Ads Management</h1>
-        <p className="text-muted-foreground">
-          Connect your Facebook account and manage your ad campaigns
-        </p>
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-4xl font-bold mb-2">Facebook Ads Management</h1>
+          <p className="text-muted-foreground">
+            Connect your Facebook account and manage your ad campaigns
+          </p>
+        </div>
+        {connection?.isActive && adAccounts.length > 0 && (
+          <Link href="/ads/create">
+            <Button size="lg">
+              <Plus className="mr-2 h-5 w-5" />
+              Create Ad
+            </Button>
+          </Link>
+        )}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
@@ -145,9 +155,15 @@ export default function AdsListPage() {
                             )}`}
                             className="flex-1"
                           >
-                            <Button className="w-full">
+                            <Button variant="outline" className="w-full">
                               <TrendingUp className="mr-2 h-4 w-4" />
-                              View Performance
+                              Performance
+                            </Button>
+                          </Link>
+                          <Link href="/ads/create" className="flex-1">
+                            <Button className="w-full">
+                              <Plus className="mr-2 h-4 w-4" />
+                              Create Ad
                             </Button>
                           </Link>
                           <Button variant="outline" size="icon" asChild>

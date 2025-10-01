@@ -60,11 +60,24 @@ export function TokenStatus() {
   }
 
   const now = Date.now();
-  const isExpired = connection.expiresAt <= now;
-  const isExpiringSoon = connection.expiresAt <= now + 7 * 24 * 60 * 60 * 1000; // 7 days
-  const expiresInText = formatDistanceToNow(new Date(connection.expiresAt), {
-    addSuffix: true,
-  });
+
+  // Validate expiresAt timestamp
+  const isValidTimestamp =
+    connection.expiresAt &&
+    typeof connection.expiresAt === "number" &&
+    connection.expiresAt > 0 &&
+    !isNaN(connection.expiresAt);
+
+  const isExpired = isValidTimestamp ? connection.expiresAt <= now : true;
+  const isExpiringSoon = isValidTimestamp
+    ? connection.expiresAt <= now + 7 * 24 * 60 * 60 * 1000
+    : false; // 7 days
+
+  const expiresInText = isValidTimestamp
+    ? formatDistanceToNow(new Date(connection.expiresAt), {
+        addSuffix: true,
+      })
+    : "Invalid date";
 
   return (
     <Card>
@@ -97,18 +110,22 @@ export function TokenStatus() {
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Connected:</span>
             <span>
-              {formatDistanceToNow(new Date(connection.connectedAt), {
-                addSuffix: true,
-              })}
+              {connection.connectedAt && !isNaN(connection.connectedAt)
+                ? formatDistanceToNow(new Date(connection.connectedAt), {
+                    addSuffix: true,
+                  })
+                : "Unknown"}
             </span>
           </div>
 
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Last Synced:</span>
             <span>
-              {formatDistanceToNow(new Date(connection.lastSyncedAt), {
-                addSuffix: true,
-              })}
+              {connection.lastSyncedAt && !isNaN(connection.lastSyncedAt)
+                ? formatDistanceToNow(new Date(connection.lastSyncedAt), {
+                    addSuffix: true,
+                  })
+                : "Unknown"}
             </span>
           </div>
 

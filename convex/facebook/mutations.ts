@@ -245,3 +245,54 @@ export const logFacebookAction = mutation({
     return { success: true };
   },
 });
+
+/**
+ * Save a created ad to the database for tracking
+ */
+export const saveCreatedAd = mutation({
+  args: {
+    adAccountId: v.string(),
+    campaignId: v.string(),
+    campaignName: v.string(),
+    adSetId: v.string(),
+    adSetName: v.string(),
+    creativeId: v.string(),
+    adId: v.string(),
+    adName: v.string(),
+    status: v.string(),
+    objective: v.string(),
+    dailyBudget: v.optional(v.number()),
+    lifetimeBudget: v.optional(v.number()),
+    targeting: v.optional(
+      v.object({
+        ageMin: v.optional(v.number()),
+        ageMax: v.optional(v.number()),
+        genders: v.optional(v.array(v.number())),
+        countries: v.optional(v.array(v.string())),
+      })
+    ),
+  },
+  handler: async (ctx, args) => {
+    const currentUser = await getCurrentUser(ctx);
+
+    await ctx.db.insert("created_ads", {
+      clerkUserId: currentUser.userId,
+      adAccountId: args.adAccountId,
+      campaignId: args.campaignId,
+      campaignName: args.campaignName,
+      adSetId: args.adSetId,
+      adSetName: args.adSetName,
+      creativeId: args.creativeId,
+      adId: args.adId,
+      adName: args.adName,
+      status: args.status,
+      objective: args.objective,
+      dailyBudget: args.dailyBudget,
+      lifetimeBudget: args.lifetimeBudget,
+      targeting: args.targeting,
+      createdAt: Date.now(),
+    });
+
+    return { success: true };
+  },
+});

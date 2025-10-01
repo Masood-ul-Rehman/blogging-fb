@@ -106,4 +106,34 @@ export default defineSchema({
     .index("by_adAccountId", ["adAccountId"])
     .index("by_timestamp", ["timestamp"])
     .index("by_action", ["action"]),
+
+  // Track ads created by users through the platform
+  created_ads: defineTable({
+    clerkUserId: v.string(), // User who created the ad
+    adAccountId: v.string(), // Which ad account
+    campaignId: v.string(), // Facebook campaign ID
+    campaignName: v.string(),
+    adSetId: v.string(), // Facebook ad set ID
+    adSetName: v.string(),
+    creativeId: v.string(), // Facebook creative ID
+    adId: v.string(), // Facebook ad ID
+    adName: v.string(),
+    status: v.string(), // ACTIVE, PAUSED, etc.
+    objective: v.string(), // Campaign objective
+    dailyBudget: v.optional(v.number()),
+    lifetimeBudget: v.optional(v.number()),
+    targeting: v.optional(
+      v.object({
+        ageMin: v.optional(v.number()),
+        ageMax: v.optional(v.number()),
+        genders: v.optional(v.array(v.number())),
+        countries: v.optional(v.array(v.string())),
+      })
+    ),
+    createdAt: v.number(),
+  })
+    .index("by_clerkUserId", ["clerkUserId"])
+    .index("by_adAccountId", ["adAccountId"])
+    .index("by_campaignId", ["campaignId"])
+    .index("by_timestamp", ["createdAt"]),
 });
