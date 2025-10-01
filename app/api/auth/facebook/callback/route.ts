@@ -250,7 +250,16 @@ export async function GET(request: NextRequest) {
     );
 
     // Step 5: Calculate token expiration
-    const expiresAt = Date.now() + longLivedTokenResponse.expires_in * 1000;
+    // Facebook long-lived tokens typically last 60 days (5,184,000 seconds)
+    const expiresInSeconds = longLivedTokenResponse.expires_in || 5184000; // Default to 60 days
+    const expiresAt = Date.now() + expiresInSeconds * 1000;
+
+    console.log("Token expiration calculated:", {
+      expires_in: longLivedTokenResponse.expires_in,
+      expiresInSeconds,
+      expiresAt,
+      expiresAtDate: new Date(expiresAt).toISOString(),
+    });
 
     // Step 6: Save to Convex (without authentication - using OAuth-specific mutation)
     console.log("Saving to Convex...");

@@ -320,6 +320,46 @@ export const updateAdStatus = action({
 });
 
 /**
+ * Manually refresh the current user's Facebook token
+ */
+export const refreshMyToken = action({
+  args: {},
+  handler: async (ctx) => {
+    const connection = await ctx.runQuery(
+      internal.facebook.queries._getFacebookConnectionWithToken
+    );
+
+    if (!connection || !connection.isActive) {
+      throw new Error("No active Facebook connection");
+    }
+
+    try {
+      // Use the internal action to refresh the token
+      const result = await ctx.runAction(
+        internal.facebook.internal.refreshSingleToken,
+        {
+          connectionId: connection._id,
+          currentToken: connection.accessToken,
+          clerkUserId: connection.clerkUserId,
+        }
+      );
+
+      if (!result.success) {
+        throw new Error(result.error || "Token refresh failed");
+      }
+
+      return {
+        success: true,
+        message: "Token refreshed successfully",
+        newExpiresAt: result.newExpiresAt,
+      };
+    } catch (error: any) {
+      throw new Error(`Failed to refresh token: ${error.message}`);
+    }
+  },
+});
+
+/**
  * Fetch Facebook Pages that the user manages
  * Required for creating ads (need a page_id)
  */

@@ -1,6 +1,7 @@
 "use client";
 
-import { useQuery, useMutation } from "convex/react";
+import { useState } from "react";
+import { useQuery, useMutation, useAction } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import {
   Card,
@@ -11,7 +12,13 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, XCircle, AlertTriangle, LogOut } from "lucide-react";
+import {
+  CheckCircle2,
+  XCircle,
+  AlertTriangle,
+  LogOut,
+  RefreshCw,
+} from "lucide-react";
 import { ConnectFacebookButton } from "./connect-facebook-button";
 import { formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
@@ -21,6 +28,8 @@ export function TokenStatus() {
   const disconnectFacebook = useMutation(
     api.facebook.mutations.disconnectFacebook
   );
+  const refreshToken = useAction(api.facebook.actions.refreshMyToken);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const handleDisconnect = async () => {
     if (
@@ -34,6 +43,18 @@ export function TokenStatus() {
       toast.success("Facebook account disconnected");
     } catch (error: any) {
       toast.error(`Failed to disconnect: ${error.message}`);
+    }
+  };
+
+  const handleRefreshToken = async () => {
+    setIsRefreshing(true);
+    try {
+      const result = await refreshToken({});
+      toast.success("Token refreshed successfully! Valid for another 60 days.");
+    } catch (error: any) {
+      toast.error(`Failed to refresh token: ${error.message}`);
+    } finally {
+      setIsRefreshing(false);
     }
   };
 
@@ -149,6 +170,16 @@ export function TokenStatus() {
           </div>
         </div>
 
+        {/* Auto-refresh info */}
+        {!isExpired && !isExpiringSoon && (
+          <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/10 rounded-lg border border-green-200 dark:border-green-900">
+            <p className="text-xs text-green-800 dark:text-green-200">
+              ✓ Your token is healthy. It will be automatically refreshed when
+              it gets close to expiring (within 7 days).
+            </p>
+          </div>
+        )}
+
         {(isExpired || !connection.isActive) && (
           <div className="rounded-lg bg-yellow-50 dark:bg-yellow-900/20 p-4 border border-yellow-200 dark:border-yellow-900">
             <div className="flex items-start gap-3">
@@ -168,16 +199,47 @@ export function TokenStatus() {
         )}
 
         {connection.isActive && !isExpired && (
-          <div className="pt-4 border-t">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleDisconnect}
-              className="w-full"
-            >
-              <LogOut className="mr-2 h-4 w-4" />
-              Disconnect Facebook
-            </Button>
+          <div className="pt-4 border-t space-y-2">
+            {isExpiringSoon && (
+              <div className="rounded-lg bg-blue-50 dark:bg-blue-900/20 p-3 border border-blue-200 dark:border-blue-900 mb-2">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                  <p className="text-xs text-blue-800 dark:text-blue-200">
+                    Token expires soon. Refresh now to extend for 60 more days.
+                  </p>
+                </div>
+              </div>
+            )}
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRefreshToken}
+                disabled={isRefreshing}
+                className="flex-1"
+              >
+                {isRefreshing ? (
+                  <>
+                    <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                    Refreshing...
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                    Refresh Token
+                  </>
+                )}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleDisconnect}
+                className="flex-1"
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                Disconnect
+              </Button>
+            </div>
           </div>
         )}
       </CardContent>
